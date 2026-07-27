@@ -1,0 +1,5 @@
+package com.dtc.bus_tracker.entity;
+
+public enum TripStatus {
+    SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+}
