@@ -1,8 +1,12 @@
 package com.dtc.bus_tracker.controller;
 
 import com.dtc.bus_tracker.dto.StopDto;
+import com.dtc.bus_tracker.dto.StopRouteInfo;
 import com.dtc.bus_tracker.entity.Stop;
+import com.dtc.bus_tracker.exception.ResourceNotFoundException;
+import com.dtc.bus_tracker.mapper.StopMapper;
 import com.dtc.bus_tracker.repository.StopRepository;
+import com.dtc.bus_tracker.service.StopDetailService;
 import com.dtc.bus_tracker.util.GeoUtils;  // ← This import now works
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,8 @@ import java.util.stream.Collectors;
 public class StopController {
 
     private final StopRepository stopRepository;
+    private final StopDetailService stopDetailService;
+    private final StopMapper stopMapper;
 
     @GetMapping
     public ResponseEntity<Page<StopDto>> getAllStops(@RequestParam(defaultValue = "0") int page,
@@ -32,8 +38,15 @@ public class StopController {
     @GetMapping("/{id}")
     public ResponseEntity<StopDto> getStopById(@PathVariable Long id) {
         Stop stop = stopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Stop not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Stop not found: " + id));
         return ResponseEntity.ok(toDto(stop));
+    }
+
+    // GET /api/stops/{id}/routes - which routes serve this stop, and the ETA
+    // of the nearest live bus on each (fills the gap noted in BACKEND_NOTES.md).
+    @GetMapping("/{id}/routes")
+    public ResponseEntity<List<StopRouteInfo>> getRoutesServingStop(@PathVariable Long id) {
+        return ResponseEntity.ok(stopDetailService.routesServing(id));
     }
 
     @GetMapping("/nearby")
@@ -53,13 +66,6 @@ public class StopController {
     }
 
     private StopDto toDto(Stop stop) {
-        StopDto dto = new StopDto();
-        dto.setId(stop.getId());
-        dto.setStopId(stop.getStopId());
-        dto.setName(stop.getName());
-        dto.setLatitude(stop.getLatitude());
-        dto.setLongitude(stop.getLongitude());
-        dto.setSequenceNumber(stop.getSequenceNumber());
-        return dto;
+        return stopMapper.toDto(stop);
     }
 }

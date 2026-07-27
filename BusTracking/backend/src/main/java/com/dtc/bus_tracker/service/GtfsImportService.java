@@ -259,6 +259,10 @@ public class GtfsImportService {
         int batchSize = 1000;
         List<StopTime> batch = new ArrayList<>();
         int[] counters = {0, 0}; // count, skipped
+        // A route "serves" a stop if any of its trips has a stop_time there.
+        // Nothing else populates this, so without it every route-stop lookup
+        // (route detail, stop search, journey planning) sees empty routes/stops.
+        Map<Stop, Set<Route>> routesByStop = new HashMap<>();
 
         withZipEntry("stop_times.txt", zis -> {
             try (CSVReader reader = new CSVReader(new InputStreamReader(zis))) {
@@ -282,6 +286,7 @@ public class GtfsImportService {
 
                     batch.add(st);
                     counters[0]++;
+                    routesByStop.computeIfAbsent(stop, k -> new HashSet<>()).add(trip.getRoute());
 
                     if (batch.size() >= batchSize) {
                         stopTimeRepository.saveAll(batch);
@@ -294,6 +299,16 @@ public class GtfsImportService {
                 System.out.println("Total stop_times imported: " + counters[0] + ". Skipped: " + counters[1]);
             }
         });
+
+        linkStopsToRoutes(routesByStop);
+    }
+
+    private void linkStopsToRoutes(Map<Stop, Set<Route>> routesByStop) {
+        for (Map.Entry<Stop, Set<Route>> entry : routesByStop.entrySet()) {
+            entry.getKey().setRoutes(new ArrayList<>(entry.getValue()));
+        }
+        stopRepository.saveAll(routesByStop.keySet());
+        System.out.println("Linked " + routesByStop.size() + " stops to their serving routes.");
     }
 
     @FunctionalInterface

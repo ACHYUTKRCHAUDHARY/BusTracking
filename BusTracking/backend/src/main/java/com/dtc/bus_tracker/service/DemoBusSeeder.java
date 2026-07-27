@@ -10,7 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -26,16 +28,17 @@ public class DemoBusSeeder {
     private static final int BUS_COUNT = 15;
     private static final double JITTER_DEGREES = 0.01; // ~1km
 
-    private final BusLocationStore busLocationStore;
+    private final BusLocationIngestService ingestService;
     private final StopRepository stopRepository;
     private final RouteRepository routeRepository;
     private final Random random = new Random();
 
     private List<Stop> anchorStops = List.of();
     private List<Route> routes = List.of();
+    private final Map<String, double[]> lastPosition = new HashMap<>(); // vehicleId -> [lat, lng]
 
-    public DemoBusSeeder(BusLocationStore busLocationStore, StopRepository stopRepository, RouteRepository routeRepository) {
-        this.busLocationStore = busLocationStore;
+    public DemoBusSeeder(BusLocationIngestService ingestService, StopRepository stopRepository, RouteRepository routeRepository) {
+        this.ingestService = ingestService;
         this.stopRepository = stopRepository;
         this.routeRepository = routeRepository;
     }
@@ -51,15 +54,30 @@ public class DemoBusSeeder {
             double lat = stop.getLatitude() + (random.nextDouble() - 0.5) * JITTER_DEGREES;
             double lng = stop.getLongitude() + (random.nextDouble() - 0.5) * JITTER_DEGREES;
             String routeCode = routes.isEmpty() ? "DEMO" : routes.get(i % routes.size()).getRouteCode();
+            String vehicleId = "DEMO-" + i;
 
-            busLocationStore.save(BusLocationEvent.builder()
-                    .vehicleId("DEMO-" + i)
+            double[] prev = lastPosition.get(vehicleId);
+            double bearing = prev == null ? random.nextDouble() * 360 : bearingBetween(prev[0], prev[1], lat, lng);
+            lastPosition.put(vehicleId, new double[]{lat, lng});
+
+            ingestService.ingest(BusLocationEvent.builder()
+                    .vehicleId(vehicleId)
                     .latitude(lat)
                     .longitude(lng)
                     .routeId(routeCode)
                     .timestamp(System.currentTimeMillis() / 1000)
+                    .speedKmh(15 + random.nextDouble() * 25)
+                    .bearing(bearing)
                     .build());
         }
+    }
+
+    private double bearingBetween(double lat1, double lon1, double lat2, double lon2) {
+        double dLon = Math.toRadians(lon2 - lon1);
+        double y = Math.sin(dLon) * Math.cos(Math.toRadians(lat2));
+        double x = Math.cos(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2))
+                - Math.sin(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(dLon);
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 
     private boolean ensureAnchors() {
