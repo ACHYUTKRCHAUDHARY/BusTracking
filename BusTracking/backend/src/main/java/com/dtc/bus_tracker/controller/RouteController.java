@@ -1,13 +1,16 @@
 package com.dtc.bus_tracker.controller;
 
 
+import com.dtc.bus_tracker.dto.RouteDetailResponse;
 import com.dtc.bus_tracker.dto.RouteDto;
 import com.dtc.bus_tracker.entity.Route;
 import com.dtc.bus_tracker.entity.Stop;
+import com.dtc.bus_tracker.exception.ResourceNotFoundException;
+import com.dtc.bus_tracker.mapper.RouteMapper;
 import com.dtc.bus_tracker.repository.RouteRepository;
 import com.dtc.bus_tracker.repository.StopRepository;
+import com.dtc.bus_tracker.service.RouteDetailService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +20,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/routes")
 @RequiredArgsConstructor
-
 public class RouteController {
 
     private final RouteRepository routeRepository;
     private final StopRepository stopRepository;
+    private final RouteDetailService routeDetailService;
+    private final RouteMapper routeMapper;
 
     // GET /api/routes - List all routes
     @GetMapping
@@ -37,8 +41,18 @@ public class RouteController {
     @GetMapping("/{id}")
     public ResponseEntity<RouteDto> getRouteById(@PathVariable Long id) {
         Route route = routeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Route not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Route not found: " + id));
         return ResponseEntity.ok(toDTO(route));
+    }
+
+    // GET /api/routes/{id}/detail?vehicleId=DL1PD6882 - ordered stops with
+    // current/next/remaining stop highlighting for a live bus on this route.
+    // vehicleId is optional; omit it to just get the ordered stop list.
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<RouteDetailResponse> getRouteDetail(
+            @PathVariable Long id,
+            @RequestParam(required = false) String vehicleId) {
+        return ResponseEntity.ok(routeDetailService.getDetail(id, vehicleId));
     }
 
     // GET /api/routes/search?query=bus&limit=10
@@ -54,14 +68,10 @@ public class RouteController {
         return ResponseEntity.ok(routes.stream().map(this::toDTO).collect(Collectors.toList()));
     }
 
-    // DTO conversion - Hides entity internals
+    // DTO conversion - MapStruct handles the flat fields, stops come from the join table.
     private RouteDto toDTO(Route route) {
-        RouteDto dto = new RouteDto();
-        dto.setId(route.getId());
-        dto.setRouteCode(route.getRouteCode());
-        dto.setName(route.getName());
+        RouteDto dto = routeMapper.toDto(route);
 
-        // Get stops for this route via join table
         List<Stop> stops = stopRepository.findByRoutes_Id(route.getId());
         dto.setStopIds(stops.stream().map(Stop::getId).collect(Collectors.toList()));
         dto.setStopNames(stops.stream().map(Stop::getName).collect(Collectors.toList()));

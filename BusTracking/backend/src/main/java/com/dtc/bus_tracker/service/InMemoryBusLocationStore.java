@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,5 +26,10 @@ public class InMemoryBusLocationStore implements BusLocationStore {
     @Override
     public Collection<BusLocationEvent> findAll() {
         return buses.values();
+    }
+
+    @Override
+    public Optional<BusLocationEvent> findByVehicleId(String vehicleId) {
+        return Optional.ofNullable(buses.get(vehicleId));
     }
 }

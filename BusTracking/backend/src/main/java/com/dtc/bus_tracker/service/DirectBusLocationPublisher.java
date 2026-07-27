@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DirectBusLocationPublisher implements BusLocationPublisher {
 
-    private final BusLocationStore busLocationStore;
+    private final BusLocationIngestService ingestService;
 
     @Override
     public void publish(BusLocationEvent event) {
-        busLocationStore.save(event);
+        ingestService.ingest(event);
     }
 }

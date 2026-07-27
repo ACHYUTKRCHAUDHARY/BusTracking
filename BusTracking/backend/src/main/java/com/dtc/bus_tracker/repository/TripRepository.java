@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {
     Optional<Trip> findByTripId(String tripId);
+    Optional<Trip> findFirstByRoute_Id(Long routeId);
 }

@@ -43,12 +43,16 @@ public class DtcApiClient {
             if (!entity.hasVehicle()) continue;
             var v = entity.getVehicle();
 
+            var position = v.getPosition();
             events.add(BusLocationEvent.builder()
                     .vehicleId(v.getVehicle().getId())
-                    .latitude((double) v.getPosition().getLatitude())
-                    .longitude((double) v.getPosition().getLongitude())
+                    .latitude((double) position.getLatitude())
+                    .longitude((double) position.getLongitude())
                     .routeId(v.getTrip().getRouteId())
                     .timestamp(v.getTimestamp())
+                    // GTFS-RT reports speed in m/s per spec; convert to km/h for display.
+                    .speedKmh(position.hasSpeed() ? position.getSpeed() * 3.6 : null)
+                    .bearing(position.hasBearing() ? (double) position.getBearing() : null)
                     .build());
         }
         return events;

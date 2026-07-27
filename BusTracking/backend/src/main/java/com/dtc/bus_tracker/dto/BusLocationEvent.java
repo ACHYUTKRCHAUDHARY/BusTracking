@@ -15,4 +15,8 @@ public class BusLocationEvent implements Serializable {
     private Double longitude;
     private String routeId;
     private Long timestamp;
+    /** km/h. Null when the source feed doesn't report it. */
+    private Double speedKmh;
+    /** Compass degrees, 0-360. Null when the source feed doesn't report it. */
+    private Double bearing;
 }
