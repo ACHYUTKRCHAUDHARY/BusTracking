@@ -53,7 +53,7 @@ export const getRouteDetail = (routeId, vehicleId) =>
 export const getAllStops = (size = 1000) =>
   client.get('/stops', { params: { page: 0, size } }).then((res) => res.data.content);
 
-export const getNearbyStops = (lat, lng, radiusMeters = 1000, limit = 20) =>
+export const getNearbyStops = (lat, lng, radiusMeters = 5000, limit = 20) =>
   client
     .get('/stops/nearby', { params: { lat, lng, radiusMeters, limit } })
     .then((res) => res.data);
@@ -65,6 +65,32 @@ export const planJourney = (sourceLat, sourceLng, destinationLat, destinationLng
   client
     .post('/journey/plan', { sourceLat, sourceLng, destinationLat, destinationLng })
     .then((res) => res.data);
+
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+// Biases geocoding results toward Delhi/NCR, the region this tracker covers.
+const DELHI_VIEWBOX = '76.70,28.95,77.55,28.30';
+
+// Place-name search for the journey planner, backed by OpenStreetMap's public
+// Nominatim geocoder (no backend involvement needed for this).
+export const searchPlaces = (query, limit = 5) =>
+  axios
+    .get(NOMINATIM_URL, {
+      params: {
+        q: query,
+        format: 'jsonv2',
+        limit,
+        viewbox: DELHI_VIEWBOX,
+        bounded: 1,
+        countrycodes: 'in',
+      },
+    })
+    .then((res) =>
+      res.data.map((place) => ({
+        label: place.display_name,
+        lat: Number(place.lat),
+        lng: Number(place.lon),
+      }))
+    );
 
 export const adminLogin = (username, password) =>
   client.post('/auth/login', { username, password }).then((res) => res.data);

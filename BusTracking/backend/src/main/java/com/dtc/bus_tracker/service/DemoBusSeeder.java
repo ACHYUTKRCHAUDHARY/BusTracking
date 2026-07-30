@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Fakes the DTC ingestion pipeline (DtcIngestionService -> Kafka -> Redis) when
- * running the "demo" profile without Kafka/Redis available. Picks a handful of
- * real imported stops and walks synthetic buses around them so the frontend
- * has something to poll.
+ * Fakes the DTC ingestion pipeline (DtcIngestionService -> Redis) when running
+ * the "demo" profile without Redis available. Picks a handful of real
+ * imported stops and walks synthetic buses around them so the frontend has
+ * something to poll.
  */
 @Service
 @Profile("demo")

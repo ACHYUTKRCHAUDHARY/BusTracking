@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Stands in for Redis when running the "demo" profile on a machine without
- * Docker/Redis available. Same contract as {@link RedisBusLocationStore}.
+ * Redis available. Same contract as {@link RedisBusLocationStore}.
  */
 @Service
 @Profile("demo")
