@@ -1,20 +1,20 @@
 import { NavLink } from 'react-router-dom';
 
 const LINKS = [
-  { to: '/', label: 'Live Map', end: true },
-  { to: '/search', label: 'Search Bus' },
-  { to: '/route', label: 'Route' },
-  { to: '/stops', label: 'Stops' },
-  { to: '/passing', label: 'Passing Near Me' },
-  { to: '/journey', label: 'Journey Planner' },
-  { to: '/replay', label: 'Replay' },
-  { to: '/admin', label: 'Admin' },
+  { to: '/', label: '🗺️ Live Map', end: true },
+  { to: '/search', label: '🔍 Search' },
+  { to: '/route', label: '🚌 Route' },
+  { to: '/stops', label: '📍 Stops' },
+  { to: '/passing', label: '⏱️ Passing' },
+  { to: '/journey', label: '🧭 Planner' },
+  { to: '/replay', label: '▶️ Replay' },
+  { to: '/admin', label: '⚙️ Admin' },
 ];
 
 export default function NavBar() {
   return (
     <nav className="nav-bar">
-      <span className="nav-brand">Delhi Bus Tracker</span>
+      <span className="nav-brand">🚍 Delhi Bus Tracker</span>
       <div className="nav-links">
         {LINKS.map((link) => (
           <NavLink

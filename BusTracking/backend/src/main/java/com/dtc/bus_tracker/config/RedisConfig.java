@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -17,13 +16,15 @@ public class RedisConfig {
         return new ObjectMapper();
     }
 
+    @SuppressWarnings("deprecation")
     @Bean
     public RedisTemplate<String, BusLocationEvent> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, BusLocationEvent> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Use GenericJackson2JsonRedisSerializer (non-deprecated)
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
+        // Use Jackson2JsonRedisSerializer instead of deprecated GenericJackson2JsonRedisSerializer
+        org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer<BusLocationEvent> serializer = 
+            new org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer<>(objectMapper(), BusLocationEvent.class);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);

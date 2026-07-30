@@ -98,7 +98,7 @@ public class GtfsImportService {
         // 3. trips.txt -> which trips (and therefore route_codes) are in scope
         List<TripRow> tripRows = readTrips();
         List<TripRow> keptTrips = filtered
-                ? tripRows.stream().filter(t -> keptTripIds.contains(t.tripId())).toList()
+                ? tripRows.stream().filter(t -> keptTripIds != null && keptTripIds.contains(t.tripId())).toList()
                 : tripRows;
         Set<String> keptRouteCodes = new HashSet<>();
         for (TripRow t : keptTrips) keptRouteCodes.add(t.routeCode());

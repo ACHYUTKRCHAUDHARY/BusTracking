@@ -28,7 +28,7 @@ public class JourneyPlannerService {
 
     private static final double WALK_SPEED_KMH = 5.0;
     private static final double BUS_SPEED_KMH = 20.0;
-    private static final double CANDIDATE_RADIUS_METERS = 1500;
+    private static final double CANDIDATE_RADIUS_METERS = 3000;
     private static final int MAX_CANDIDATE_STOPS = 5;
     private static final int MAX_OPTIONS = 5;
 
@@ -44,7 +44,7 @@ public class JourneyPlannerService {
             options = findTransferOptions(srcLat, srcLng, dstLat, dstLng, boardingCandidates, alightingCandidates);
         }
 
-        options.sort(Comparator.comparingInt(JourneyOption::getTotalMinutes));
+        options.sort(Comparator.comparingInt(o -> o.getTotalMinutes()));
         return JourneyPlanResponse.builder()
                 .options(options.stream().limit(MAX_OPTIONS).toList())
                 .build();

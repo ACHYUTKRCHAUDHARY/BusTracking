@@ -2,7 +2,7 @@ package com.dtc.bus_tracker.service;
 
 import com.dtc.bus_tracker.entity.Route;
 import com.dtc.bus_tracker.entity.Stop;
-import com.dtc.bus_tracker.entity.StopTime;
+
 import com.dtc.bus_tracker.entity.Trip;
 import com.dtc.bus_tracker.repository.StopTimeRepository;
 import com.dtc.bus_tracker.repository.TripRepository;
@@ -38,7 +38,7 @@ public class RouteStopSequenceService {
 
     private List<Stop> orderedStopsForTrip(Trip trip) {
         return stopTimeRepository.findByTrip_IdOrderByStopSequenceAsc(trip.getId()).stream()
-                .map(StopTime::getStop)
+                .map(st -> st.getStop())
                 .toList();
     }
 }

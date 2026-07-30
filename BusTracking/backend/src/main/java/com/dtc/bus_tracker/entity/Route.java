@@ -25,6 +25,7 @@ public class Route {
     @Column
     private String name;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "routes")
     private List<Stop> stops = new ArrayList<>();
 

@@ -73,8 +73,8 @@ public class RouteController {
         RouteDto dto = routeMapper.toDto(route);
 
         List<Stop> stops = stopRepository.findByRoutes_Id(route.getId());
-        dto.setStopIds(stops.stream().map(Stop::getId).collect(Collectors.toList()));
-        dto.setStopNames(stops.stream().map(Stop::getName).collect(Collectors.toList()));
+        dto.setStopIds(stops.stream().map(stop -> stop.getId()).collect(Collectors.toList()));
+        dto.setStopNames(stops.stream().map(stop -> stop.getName()).collect(Collectors.toList()));
 
         return dto;
     }

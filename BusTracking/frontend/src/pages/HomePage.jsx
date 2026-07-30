@@ -110,7 +110,7 @@ export default function HomePage() {
       )}
 
       <div className="status-bar">
-        {liveBuses.length} bus{liveBuses.length === 1 ? '' : 'es'} nearby
+        🚌 {liveBuses.length} bus{liveBuses.length === 1 ? '' : 'es'} nearby
         {lastUpdated && ` · updated ${lastUpdated.toLocaleTimeString()}`}
         <span className={connected ? 'live-dot live-dot-on' : 'live-dot'} title={connected ? 'Live updates connected' : 'Live updates offline'} />
       </div>

@@ -55,7 +55,7 @@ public class RouteDetailService {
         }
 
         Integer etaToNextStopMinutes = null;
-        if (currentIndex >= 0 && currentIndex + 1 < stops.size()) {
+        if (liveEvent != null && currentIndex >= 0 && currentIndex + 1 < stops.size()) {
             Stop next = stops.get(currentIndex + 1);
             double distance = GeoUtils.haversine(
                     liveEvent.getLatitude(), liveEvent.getLongitude(),

@@ -48,17 +48,17 @@ public class AdminStatsService {
 
         double averageSpeed = reporting.stream()
                 .filter(e -> e.getSpeedKmh() != null)
-                .mapToDouble(BusLocationEvent::getSpeedKmh)
+                .mapToDouble(e -> e.getSpeedKmh())
                 .average()
                 .orElse(0.0);
 
         Map<String, Long> busesPerRoute = reporting.stream()
                 .filter(e -> e.getRouteId() != null)
-                .collect(Collectors.groupingBy(BusLocationEvent::getRouteId, Collectors.counting()));
+                .collect(Collectors.groupingBy(e -> e.getRouteId(), Collectors.counting()));
 
         List<RouteStat> routeStats = busesPerRoute.entrySet().stream()
                 .map(e -> RouteStat.builder().routeCode(e.getKey()).activeBusCount(e.getValue()).build())
-                .sorted(Comparator.comparingLong(RouteStat::getActiveBusCount).reversed())
+                .sorted(Comparator.comparingLong((RouteStat r) -> r.getActiveBusCount()).reversed())
                 .toList();
 
         return AdminStatsResponse.builder()

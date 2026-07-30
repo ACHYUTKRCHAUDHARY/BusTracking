@@ -33,6 +33,7 @@ public class Stop {
     @Column(name = "sequence_number")
     private Integer sequenceNumber;
 
+    @Builder.Default
     @ManyToMany
     @JoinTable(
             name = "route_stop",

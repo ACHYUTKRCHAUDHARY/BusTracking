@@ -1,14 +1,13 @@
 package com.dtc.bus_tracker.service;
 
 import com.dtc.bus_tracker.dto.BusLocationEvent;
-import org.springframework.context.annotation.Profile;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Profile("!demo")
 public class DtcIngestionService {
 
     private final DtcApiClient dtcApiClient;
