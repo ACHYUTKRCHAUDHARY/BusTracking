@@ -47,7 +47,7 @@ GET /api/stops/{id}
 GET /api/stops/nearby?lat={lat}&lng={lng}&radiusMeters={m}&limit={n}
 ```
 
-Note the param is **`radiusMeters`**, not `radius` — defaults to `1000` on
+Note the param is **`radiusMeters`**, not `radius` — defaults to `5000` on
 `/buses/nearby` and `/stops/nearby` if omitted. `limit` defaults to `10`.
 
 There's currently **no endpoint that returns "routes serving a stop"** — the

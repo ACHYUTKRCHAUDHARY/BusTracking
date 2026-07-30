@@ -29,9 +29,10 @@ import java.util.zip.ZipInputStream;
  * (10k+ stops, 3.7M stop_times rows) which is slow to import and more data
  * than a local demo needs, so the import is restricted to stops within
  * {@code gtfs.import.radius-degrees} of {@code gtfs.import.center-lat/lng}
- * (default: a small box around Connaught Place). Routes/trips/stop_times are
- * then pruned to only what actually serves those stops. Set radius-degrees
- * to 0 or less to import the entire feed.
+ * (default: a box covering North Delhi and North West Delhi - Civil Lines,
+ * Rohini, Pitampura, Shalimar Bagh, Narela, Bawana, Mangolpuri, etc).
+ * Routes/trips/stop_times are then pruned to only what actually serves those
+ * stops. Set radius-degrees to 0 or less to import the entire feed.
  */
 @Service
 public class GtfsImportService {
@@ -43,11 +44,11 @@ public class GtfsImportService {
 
     private static final String GTFS_ZIP_PATH = "static/GTFS.zip";
 
-    @Value("${gtfs.import.center-lat:28.6139}")
+    @Value("${gtfs.import.center-lat:28.77}")
     private double centerLat;
-    @Value("${gtfs.import.center-lng:77.209}")
+    @Value("${gtfs.import.center-lng:77.09}")
     private double centerLng;
-    @Value("${gtfs.import.radius-degrees:0.03}")
+    @Value("${gtfs.import.radius-degrees:0.16}")
     private double radiusDegrees;
 
     public GtfsImportService(

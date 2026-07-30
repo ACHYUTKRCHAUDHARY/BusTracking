@@ -28,7 +28,7 @@ public class BusController {
     public ResponseEntity<List<NearbyBusResponse>> getNearbyBuses(
             @RequestParam double lat,
             @RequestParam double lng,
-            @RequestParam(defaultValue = "1000") double radiusMeters,
+            @RequestParam(defaultValue = "5000") double radiusMeters,
             @RequestParam(defaultValue = "10") int limit) {
 
         List<NearbyBusResponse> response = nearbyBusService.findNearbyBuses(lat, lng, radiusMeters, limit);

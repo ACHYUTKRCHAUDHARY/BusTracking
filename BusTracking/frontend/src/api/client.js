@@ -20,7 +20,7 @@ export const getAdminToken = () => localStorage.getItem(ADMIN_TOKEN_KEY);
 export const setAdminToken = (token) => localStorage.setItem(ADMIN_TOKEN_KEY, token);
 export const clearAdminToken = () => localStorage.removeItem(ADMIN_TOKEN_KEY);
 
-export const getNearbyBuses = (lat, lng, radiusMeters = 2000, limit = 30) =>
+export const getNearbyBuses = (lat, lng, radiusMeters = 5000, limit = 30) =>
   client
     .get('/buses/nearby', { params: { lat, lng, radiusMeters, limit } })
     .then((res) => res.data);
