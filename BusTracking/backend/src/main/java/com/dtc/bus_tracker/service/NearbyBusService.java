@@ -20,10 +20,20 @@ public class NearbyBusService {
     private final BusLocationStore busLocationStore;
 
     public List<NearbyBusResponse> findNearbyBuses(double lat, double lng, double radiusMeters, int limit) {
-        List<Stop> allStops = stopRepository.findAll();
+        // Optimization: Use a bounding box to fetch only nearby stops instead of all stops.
+        // We use a search radius of at least 5000 meters to ensure we find a context stop.
+        double searchRadius = Math.max(radiusMeters, 5000.0);
+        double latDelta = searchRadius / 111320.0;
+        double lngDelta = searchRadius / (111320.0 * Math.cos(Math.toRadians(lat)));
+
+        List<Stop> nearbyStops = stopRepository.findStopsWithinBoundingBox(
+                lat - latDelta, lat + latDelta,
+                lng - lngDelta, lng + lngDelta
+        );
+
         Stop nearestStop = null;
         double minStopDist = Double.MAX_VALUE;
-        for (Stop stop : allStops) {
+        for (Stop stop : nearbyStops) {
             double dist = GeoUtils.haversine(lat, lng, stop.getLatitude(), stop.getLongitude());
             if (dist < minStopDist) {
                 minStopDist = dist;
@@ -61,6 +71,10 @@ public class NearbyBusService {
         }
 
         responses.sort((r1, r2) -> Double.compare(r1.getDistanceToUser(), r2.getDistanceToUser()));
-        return responses.stream().limit(limit).toList();
+        
+        if (limit > 0) {
+            return responses.stream().limit(limit).toList();
+        }
+        return responses;
     }
 }

@@ -19,6 +19,9 @@ export default function HomePage() {
     userLocationRef.current = userLocation;
   }, [userLocation]);
 
+  // Fallback to Delhi center if user location takes time or is denied
+  const activeLocation = userLocation || { lat: 28.6315, lng: 77.2167 };
+
   // Track the user's position continuously.
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -30,17 +33,17 @@ export default function HomePage() {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocationError(null);
       },
-      (err) => setLocationError(err.message),
+      (err) => setLocationError(err.message + ' (using Delhi center)'),
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
     );
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
   // Load all stops once so route selections can be resolved to lat/lng
-  // client-side (the backend has no "stops for route, with coordinates" endpoint).
   useEffect(() => {
     getAllStops()
       .then((stops) => {
+        if (!stops) return;
         const map = {};
         stops.forEach((s) => {
           map[s.id] = s;
@@ -51,11 +54,10 @@ export default function HomePage() {
   }, []);
 
   const fetchBuses = useCallback(() => {
-    const loc = userLocationRef.current;
-    if (!loc) return;
-    getNearbyBuses(loc.lat, loc.lng)
+    const loc = userLocationRef.current || { lat: 28.6315, lng: 77.2167 };
+    getNearbyBuses(loc.lat, loc.lng, 5000, 50)
       .then((data) => {
-        setBuses(data);
+        setBuses(data || []);
         setLastUpdated(new Date());
       })
       .catch((err) => console.error('Failed to fetch nearby buses', err));
@@ -64,7 +66,7 @@ export default function HomePage() {
   // Fetch as soon as we have a location, then keep polling every 10s as a
   // baseline; the WebSocket feed (below) nudges positions in between polls.
   useEffect(() => {
-    if (userLocation) fetchBuses();
+    fetchBuses();
   }, [userLocation, fetchBuses]);
 
   useEffect(() => {
@@ -84,13 +86,16 @@ export default function HomePage() {
     [buses, livePositions]
   );
 
-  const handleSelectRoute = (route) => {
-    const stops = (route.stopIds || [])
-      .map((id) => stopsById[id])
-      .filter(Boolean)
-      .map((s) => ({ id: s.id, name: s.name, lat: s.latitude, lng: s.longitude }));
-    setSelectedRoute({ ...route, stops });
-  };
+  const handleSelectRoute = useCallback(
+    (route) => {
+      const stops = (route.stopIds || [])
+        .map((id) => stopsById[id])
+        .filter(Boolean)
+        .map((s) => ({ id: s.id, name: s.name, lat: s.latitude, lng: s.longitude }));
+      setSelectedRoute({ ...route, stops });
+    },
+    [stopsById]
+  );
 
   return (
     <div className="app-container">
@@ -110,7 +115,7 @@ export default function HomePage() {
       )}
 
       <div className="status-bar">
-        🚌 {liveBuses.length} bus{liveBuses.length === 1 ? '' : 'es'} nearby
+        {liveBuses.length} bus{liveBuses.length === 1 ? '' : 'es'} nearby
         {lastUpdated && ` · updated ${lastUpdated.toLocaleTimeString()}`}
         <span className={connected ? 'live-dot live-dot-on' : 'live-dot'} title={connected ? 'Live updates connected' : 'Live updates offline'} />
       </div>

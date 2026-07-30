@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { searchPlaces } from '../api/client';
 
-// Debounced place-name autocomplete, styled to match the map's route SearchBar.
-export default function PlaceSearchField({ placeholder, value, onChange, onSelect }) {
+function PlaceSearchField({ placeholder, value, onChange, onSelect }) {
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
 
@@ -15,9 +14,17 @@ export default function PlaceSearchField({ placeholder, value, onChange, onSelec
       searchPlaces(value)
         .then(setResults)
         .catch(() => setResults([]));
-    }, 400);
+    }, 350);
     return () => clearTimeout(handle);
   }, [value]);
+
+  const handleSelect = useCallback(
+    (place) => {
+      onSelect(place);
+      setOpen(false);
+    },
+    [onSelect]
+  );
 
   return (
     <div className="place-search">
@@ -30,20 +37,13 @@ export default function PlaceSearchField({ placeholder, value, onChange, onSelec
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        // onMouseDown on the option fires before this blur closes the list
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         required
       />
       {open && results.length > 0 && (
         <ul className="search-results">
           {results.map((place, i) => (
-            <li
-              key={i}
-              onMouseDown={() => {
-                onSelect(place);
-                setOpen(false);
-              }}
-            >
+            <li key={i} onMouseDown={() => handleSelect(place)}>
               {place.label}
             </li>
           ))}
@@ -52,3 +52,5 @@ export default function PlaceSearchField({ placeholder, value, onChange, onSelec
     </div>
   );
 }
+
+export default memo(PlaceSearchField);

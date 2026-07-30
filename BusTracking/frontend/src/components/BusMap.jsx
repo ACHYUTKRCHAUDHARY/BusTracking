@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl, useMap } from 'react-leaflet';
 import { userIcon, stopIcon, busIcon } from '../utils/leafletIcons';
 
@@ -18,20 +18,30 @@ function RecenterOnFirstFix({ userLocation }) {
   return null;
 }
 
-export default function BusMap({ userLocation, buses, selectedRoute, onSelectStop }) {
-  const busesAtStop = (stopName) => buses.filter((b) => b.stopName === stopName);
+function BusMap({ userLocation, buses = [], selectedRoute, onSelectStop }) {
+  // Memoize unique buses list to prevent duplicate vehicle keys and redundant map marker allocations
+  const uniqueBuses = useMemo(() => {
+    if (!buses?.length) return [];
+    return Array.from(new Map(buses.map((b) => [b.vehicleId, b])).values());
+  }, [buses]);
 
-  // The API returns one row per (bus, nearby stop) pair - the same vehicle can
-  // legitimately appear once per stop it's approaching. Collapse to one
-  // marker per vehicle (closest match wins, since `buses` arrives pre-sorted
-  // by distanceToUser) so React doesn't choke on duplicate keys.
-  const uniqueBuses = Array.from(new Map(buses.map((b) => [b.vehicleId, b])).values());
+  // Memoize buses lookup by stop name
+  const busesAtStop = useCallback(
+    (stopName) => uniqueBuses.filter((b) => b.stopName === stopName),
+    [uniqueBuses]
+  );
+
+  const routePolyline = useMemo(() => {
+    if (!selectedRoute?.stops?.length) return [];
+    return selectedRoute.stops.map((s) => [s.lat, s.lng]);
+  }, [selectedRoute]);
 
   return (
     <MapContainer center={DELHI_CENTER} zoom={13} zoomControl={false} style={{ height: '100%', width: '100%' }}>
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        maxZoom={19}
       />
       <ZoomControl position="bottomright" />
 
@@ -68,11 +78,11 @@ export default function BusMap({ userLocation, buses, selectedRoute, onSelectSto
         </Marker>
       ))}
 
-      {selectedRoute?.stops?.length > 0 && (
+      {routePolyline.length > 0 && (
         <>
           <Polyline
-            positions={selectedRoute.stops.map((s) => [s.lat, s.lng])}
-            pathOptions={{ color: '#aa3bff', weight: 4 }}
+            positions={routePolyline}
+            pathOptions={{ color: '#2563eb', weight: 4, opacity: 0.8 }}
           />
           {selectedRoute.stops.map((stop) => {
             const upcoming = busesAtStop(stop.name);
@@ -109,3 +119,6 @@ export default function BusMap({ userLocation, buses, selectedRoute, onSelectSto
     </MapContainer>
   );
 }
+
+// React.memo prevents full map component re-renders when parent state updates unrelated props
+export default memo(BusMap);

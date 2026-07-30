@@ -14,9 +14,9 @@ L.Icon.Default.mergeOptions({
 
 export const userIcon = L.divIcon({
   className: 'user-location-marker',
-  html: '<div class="user-dot"></div>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
+  html: '<div class="user-pulse"></div><div class="user-dot"></div>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 export const stopIcon = L.divIcon({
@@ -29,8 +29,8 @@ export const stopIcon = L.divIcon({
 export function busIcon(routeCode) {
   return L.divIcon({
     className: 'bus-marker',
-    html: `<div class="bus-chip">${routeCode ?? '?'}</div>`,
-    iconSize: [32, 20],
-    iconAnchor: [16, 10],
+    html: `<div class="bus-chip"><span class="bus-chip-dot"></span><span class="bus-chip-code">${routeCode ?? '?'}</span></div>`,
+    iconSize: [42, 24],
+    iconAnchor: [21, 12],
   });
 }

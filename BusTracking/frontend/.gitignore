@@ -1,3 +1,10 @@
+# AI Assistant & Agent directories
+.gemini/
+.claude/
+.antigravity/
+.agents/
+.brain/
+
 # Logs
 logs
 *.log

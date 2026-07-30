@@ -3,13 +3,14 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { WS_BASE } from '../api/client';
 
-// Subscribes to /topic/buses (see WebSocketConfig + BusLocationIngestService
-// on the backend) and keeps a live vehicleId -> latest event map, so any
-// screen can show positions pushed in real time instead of polling.
+// Subscribes to /topic/buses and batches incoming live position updates
+// at a 1-second interval using useRef + React hooks to prevent high-frequency re-render lag.
 export default function useBusSocket({ enabled = true } = {}) {
   const [positions, setPositions] = useState({});
   const [connected, setConnected] = useState(false);
   const clientRef = useRef(null);
+  const bufferRef = useRef({});
+  const isDirtyRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -22,7 +23,10 @@ export default function useBusSocket({ enabled = true } = {}) {
         stompClient.subscribe('/topic/buses', (message) => {
           try {
             const event = JSON.parse(message.body);
-            setPositions((prev) => ({ ...prev, [event.vehicleId]: event }));
+            if (event?.vehicleId) {
+              bufferRef.current[event.vehicleId] = event;
+              isDirtyRef.current = true;
+            }
           } catch {
             // ignore malformed frame
           }
@@ -35,7 +39,16 @@ export default function useBusSocket({ enabled = true } = {}) {
     clientRef.current = stompClient;
     stompClient.activate();
 
+    // Flush buffered position updates to React state once per second
+    const flushInterval = setInterval(() => {
+      if (isDirtyRef.current) {
+        setPositions((prev) => ({ ...prev, ...bufferRef.current }));
+        isDirtyRef.current = false;
+      }
+    }, 1000);
+
     return () => {
+      clearInterval(flushInterval);
       stompClient.deactivate();
     };
   }, [enabled]);

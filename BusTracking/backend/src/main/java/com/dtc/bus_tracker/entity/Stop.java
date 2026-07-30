@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 @Entity
-@Table(name = "stops")
+@Table(name = "stops", indexes = {
+    @Index(name = "idx_stop_location", columnList = "latitude, longitude")
+})
 @Builder  // ← ADD THIS
 @NoArgsConstructor
 @AllArgsConstructor

@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 const PROGRESS_LABEL = {
   PASSED: 'Passed',
   CURRENT: 'Current',
@@ -5,7 +7,7 @@ const PROGRESS_LABEL = {
   UPCOMING: 'Upcoming',
 };
 
-export default function StopProgressList({ stops }) {
+function StopProgressList({ stops }) {
   if (!stops?.length) return <p>No stop data for this route.</p>;
 
   return (
@@ -20,3 +22,5 @@ export default function StopProgressList({ stops }) {
     </ol>
   );
 }
+
+export default memo(StopProgressList);

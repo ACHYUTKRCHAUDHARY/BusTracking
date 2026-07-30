@@ -1,0 +1,84 @@
+# AI Assistant & Agent directories
+.gemini/
+.claude/
+.antigravity/
+.agents/
+.brain/
+**/.gemini/
+**/.claude/
+**/.antigravity/
+**/.agents/
+**/.brain/
+
+# AI / ML Model files & Protobuf binaries
+*.bin
+*.onnx
+*.pt
+*.pth
+*.h5
+*.pb
+*.pkl
+*.pickle
+*.safetensors
+*.gguf
+*.tflite
+*.weights
+*.model
+
+# IDE, Editor & OS files
+.vscode/
+.idea/
+.project
+.classpath
+.settings/
+.factorypath
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependencies & Build artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+target/
+**/target/
+build/
+**/build/
+.mvn/wrapper/maven-wrapper.jar
+.cache/
+.turbo/
+.next/
+coverage/
+
+# Python & System caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Local Data & Database files
+data/
+**/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs & Environment files
+*.log
+**/logs/
+.env
+.env.local
+.env.*.local
+application-local.properties
+
+# Temporary & Swap files
+*.tmp
+*.bak
+*.swp
+
+# Explicitly KEEP GTFS data files
+!gtfs.zip
+!**/gtfs.zip
+!*.zip

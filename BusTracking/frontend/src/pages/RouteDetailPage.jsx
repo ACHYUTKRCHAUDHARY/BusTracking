@@ -116,8 +116,9 @@ export default function RouteDetailPage() {
               <div className="mini-map">
                 <MapContainer center={DELHI_CENTER} zoom={12} style={{ height: '100%', width: '100%' }}>
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    maxZoom={19}
                   />
                   {polyline.length > 0 && <Polyline positions={polyline} pathOptions={{ color: '#aa3bff', weight: 4 }} />}
                   {detail.stops.map((s) => (

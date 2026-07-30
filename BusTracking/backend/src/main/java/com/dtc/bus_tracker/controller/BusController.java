@@ -29,7 +29,7 @@ public class BusController {
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5000") double radiusMeters,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "-1") int limit) {
 
         List<NearbyBusResponse> response = nearbyBusService.findNearbyBuses(lat, lng, radiusMeters, limit);
         return ResponseEntity.ok(response);

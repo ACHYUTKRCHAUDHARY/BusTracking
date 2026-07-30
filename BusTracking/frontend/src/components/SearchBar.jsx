@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { searchRoutes } from '../api/client';
 
-export default function SearchBar({ onSelectRoute }) {
+function SearchBar({ onSelectRoute }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
@@ -15,9 +15,18 @@ export default function SearchBar({ onSelectRoute }) {
       searchRoutes(query)
         .then(setResults)
         .catch(() => setResults([]));
-    }, 300);
+    }, 250);
     return () => clearTimeout(handle);
   }, [query]);
+
+  const handleSelect = useCallback(
+    (route) => {
+      onSelectRoute(route);
+      setQuery(route.routeCode);
+      setOpen(false);
+    },
+    [onSelectRoute]
+  );
 
   return (
     <div className="search-bar">
@@ -35,15 +44,7 @@ export default function SearchBar({ onSelectRoute }) {
       {open && results.length > 0 && (
         <ul className="search-results">
           {results.map((route) => (
-            <li
-              key={route.id}
-              // onMouseDown fires before the input's onBlur closes the list
-              onMouseDown={() => {
-                onSelectRoute(route);
-                setQuery(route.routeCode);
-                setOpen(false);
-              }}
-            >
+            <li key={route.id} onMouseDown={() => handleSelect(route)}>
               <strong>{route.routeCode}</strong> {route.name}
             </li>
           ))}
@@ -52,3 +53,5 @@ export default function SearchBar({ onSelectRoute }) {
     </div>
   );
 }
+
+export default memo(SearchBar);

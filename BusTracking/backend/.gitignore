@@ -1,3 +1,25 @@
+# AI Assistant & Agent directories
+.gemini/
+.claude/
+.antigravity/
+.agents/
+.brain/
+
+# AI / ML Model files & binaries
+*.bin
+*.onnx
+*.pt
+*.pth
+*.h5
+*.pb
+*.pkl
+*.pickle
+*.safetensors
+*.gguf
+*.tflite
+*.weights
+*.model
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -33,5 +55,6 @@ build/
 .vscode/
 application-local.properties
 
-### Demo profile H2 database ###
+### Demo profile H2 database & logs ###
 data/
+*.log
