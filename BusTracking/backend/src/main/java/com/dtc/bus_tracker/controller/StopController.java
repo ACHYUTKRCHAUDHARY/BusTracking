@@ -52,7 +52,7 @@ public class StopController {
     @GetMapping("/nearby")
     public ResponseEntity<List<StopDto>> getNearbyStops(@RequestParam double lat,
                                                         @RequestParam double lng,
-                                                        @RequestParam(defaultValue = "1000") double radiusMeters,
+                                                        @RequestParam(defaultValue = "5000") double radiusMeters,
                                                         @RequestParam(defaultValue = "10") int limit) {
         List<Stop> allStops = stopRepository.findAll();
         List<Stop> nearby = allStops.stream()

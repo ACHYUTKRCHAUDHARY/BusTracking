@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 /**
- * Single entry point every ingestion path (Kafka consumer, direct-to-Redis
- * prod publisher, demo seeder) funnels a location update through. Keeping the
- * cache write, the durable history row, and the WebSocket broadcast together
- * here means none of those call sites need to know about the other two.
+ * Single entry point every ingestion path (direct-to-Redis publisher, demo
+ * seeder) funnels a location update through. Keeping the cache write, the
+ * durable history row, and the WebSocket broadcast together here means none
+ * of those call sites need to know about the other two.
  */
 @Service
 @RequiredArgsConstructor

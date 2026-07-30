@@ -3,7 +3,7 @@ import { getNearbyStops, getRoutesServingStop } from '../api/client';
 
 export default function StopsNearbyPage() {
   const [userLocation, setUserLocation] = useState(null);
-  const [radius, setRadius] = useState(1000);
+  const [radius, setRadius] = useState(5000);
   const [stops, setStops] = useState([]);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
@@ -57,6 +57,7 @@ export default function StopsNearbyPage() {
             type="number"
             value={radius}
             min={100}
+            max={5000}
             step={100}
             onChange={(e) => setRadius(Number(e.target.value))}
           />

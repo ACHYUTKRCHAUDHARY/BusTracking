@@ -1,11 +1,48 @@
 import { useState } from 'react';
-import { planJourney } from '../api/client';
+import { getNearbyStops, planJourney } from '../api/client';
+import { haversineMeters } from '../utils/geo';
+import PlaceSearchField from '../components/PlaceSearchField';
+
+const NEAREST_STOP_RADIUS_METERS = 2000;
+
+function usePlaceEndpoint() {
+  const [query, setQuery] = useState('');
+  const [place, setPlace] = useState(null); // { label, lat, lng }
+  const [nearestStop, setNearestStop] = useState(null); // { name, distanceMeters }
+  const [findingStop, setFindingStop] = useState(false);
+
+  const resolve = (resolvedPlace) => {
+    setPlace(resolvedPlace);
+    setQuery(resolvedPlace.label);
+    setNearestStop(null);
+    setFindingStop(true);
+    getNearbyStops(resolvedPlace.lat, resolvedPlace.lng, NEAREST_STOP_RADIUS_METERS, 1)
+      .then((stops) => {
+        if (stops.length === 0) {
+          setNearestStop(null);
+          return;
+        }
+        const stop = stops[0];
+        setNearestStop({
+          name: stop.name,
+          distanceMeters: haversineMeters(resolvedPlace.lat, resolvedPlace.lng, stop.latitude, stop.longitude),
+        });
+      })
+      .catch(() => setNearestStop(null))
+      .finally(() => setFindingStop(false));
+  };
+
+  const reset = () => {
+    setPlace(null);
+    setNearestStop(null);
+  };
+
+  return { query, setQuery, place, nearestStop, findingStop, resolve, reset };
+}
 
 export default function JourneyPlannerPage() {
-  const [sourceLat, setSourceLat] = useState('');
-  const [sourceLng, setSourceLng] = useState('');
-  const [destinationLat, setDestinationLat] = useState('');
-  const [destinationLng, setDestinationLng] = useState('');
+  const source = usePlaceEndpoint();
+  const destination = usePlaceEndpoint();
   const [options, setOptions] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -13,16 +50,20 @@ export default function JourneyPlannerPage() {
   const useMyLocation = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
-      setSourceLat(pos.coords.latitude.toFixed(6));
-      setSourceLng(pos.coords.longitude.toFixed(6));
+      source.resolve({
+        label: 'My current location',
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      });
     });
   };
 
   const submit = (e) => {
     e.preventDefault();
+    if (!source.place || !destination.place) return;
     setError(null);
     setLoading(true);
-    planJourney(Number(sourceLat), Number(sourceLng), Number(destinationLat), Number(destinationLng))
+    planJourney(source.place.lat, source.place.lng, destination.place.lat, destination.place.lng)
       .then((res) => setOptions(res.options))
       .catch(() => setError('Could not plan a journey between those points.'))
       .finally(() => setLoading(false));
@@ -35,18 +76,36 @@ export default function JourneyPlannerPage() {
       <form className="journey-form" onSubmit={submit}>
         <fieldset>
           <legend>Source</legend>
-          <input type="number" step="any" placeholder="Latitude" value={sourceLat} onChange={(e) => setSourceLat(e.target.value)} required />
-          <input type="number" step="any" placeholder="Longitude" value={sourceLng} onChange={(e) => setSourceLng(e.target.value)} required />
+          <PlaceSearchField
+            placeholder="Search a place..."
+            value={source.query}
+            onChange={(q) => {
+              source.setQuery(q);
+              source.reset();
+            }}
+            onSelect={source.resolve}
+          />
           <button type="button" onClick={useMyLocation}>
             Use my location
           </button>
         </fieldset>
+        <NearestStopHint endpoint={source} />
+
         <fieldset>
           <legend>Destination</legend>
-          <input type="number" step="any" placeholder="Latitude" value={destinationLat} onChange={(e) => setDestinationLat(e.target.value)} required />
-          <input type="number" step="any" placeholder="Longitude" value={destinationLng} onChange={(e) => setDestinationLng(e.target.value)} required />
+          <PlaceSearchField
+            placeholder="Search a place..."
+            value={destination.query}
+            onChange={(q) => {
+              destination.setQuery(q);
+              destination.reset();
+            }}
+            onSelect={destination.resolve}
+          />
         </fieldset>
-        <button type="submit" disabled={loading}>
+        <NearestStopHint endpoint={destination} />
+
+        <button type="submit" disabled={loading || !source.place || !destination.place}>
           {loading ? 'Planning…' : 'Plan Journey'}
         </button>
       </form>
@@ -76,5 +135,16 @@ export default function JourneyPlannerPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+function NearestStopHint({ endpoint }) {
+  if (!endpoint.place) return null;
+  if (endpoint.findingStop) return <p className="nearest-stop-hint">Finding nearest bus stop…</p>;
+  if (!endpoint.nearestStop) return <p className="nearest-stop-hint">No bus stop within {NEAREST_STOP_RADIUS_METERS / 1000} km.</p>;
+  return (
+    <p className="nearest-stop-hint">
+      Nearest bus stop: <strong>{endpoint.nearestStop.name}</strong> ({Math.round(endpoint.nearestStop.distanceMeters)} m away)
+    </p>
   );
 }
