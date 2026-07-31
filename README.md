@@ -122,5 +122,32 @@ npm run dev
 
 ---
 
+## 🐘 Deploying Backend with Neon Database (PostgreSQL)
+
+### 1. Obtain Database Connection String from Neon
+1. Log into your [Neon Console](https://console.neon.tech/).
+2. Create a new PostgreSQL Project.
+3. In the Dashboard, copy your connection details or connection string:
+   - **Host**: `ep-xyz-123.us-east-2.aws.neon.tech`
+   - **Database**: `neondb`
+   - **User**: `neondb_owner`
+   - **Password**: `<your-neon-password>`
+
+### 2. Environment Variables Setup
+Set the following environment variables on your deployment platform (e.g. Render, Railway, Heroku, or locally):
+
+```env
+SPRING_DATASOURCE_URL=jdbc:postgresql://ep-xyz-123.us-east-2.aws.neon.tech/neondb?sslmode=require
+SPRING_DATASOURCE_USERNAME=neondb_owner
+SPRING_DATASOURCE_PASSWORD=your_neon_password
+```
+
+### 3. Connection Pool Tuning
+Neon uses serverless PostgreSQL. The application is pre-configured with optimized HikariCP settings:
+- `HIKARI_MAX_POOL_SIZE=10` (default)
+- `HIKARI_MIN_IDLE=2` (default)
+
+---
+
 ## 📄 License
 This project is open source and available under the [MIT License](LICENSE).
