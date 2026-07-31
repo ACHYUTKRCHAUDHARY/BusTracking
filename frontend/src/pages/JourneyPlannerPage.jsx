@@ -3,7 +3,7 @@ import { getNearbyStops, planJourney } from '../api/client';
 import { haversineMeters } from '../utils/geo';
 import PlaceSearchField from '../components/PlaceSearchField';
 
-const NEAREST_STOP_RADIUS_METERS = 2000;
+const NEAREST_STOP_RADIUS_METERS = 50000;
 
 function usePlaceEndpoint() {
   const [query, setQuery] = useState('');

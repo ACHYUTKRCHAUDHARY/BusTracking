@@ -28,7 +28,6 @@ public class JourneyPlannerService {
 
     private static final double WALK_SPEED_KMH = 5.0;
     private static final double BUS_SPEED_KMH = 20.0;
-    private static final double CANDIDATE_RADIUS_METERS = 3000;
     private static final int MAX_CANDIDATE_STOPS = 5;
     private static final int MAX_OPTIONS = 5;
 
@@ -159,11 +158,22 @@ public class JourneyPlannerService {
     }
 
     private List<Stop> nearestStops(double lat, double lng) {
-        return stopRepository.findAll().stream()
-                .filter(stop -> GeoUtils.haversine(lat, lng, stop.getLatitude(), stop.getLongitude()) <= CANDIDATE_RADIUS_METERS)
-                .sorted(Comparator.comparingDouble(stop -> GeoUtils.haversine(lat, lng, stop.getLatitude(), stop.getLongitude())))
-                .limit(MAX_CANDIDATE_STOPS)
-                .toList();
+        List<Stop> allStops = stopRepository.findAll();
+        double[] radii = { 3000, 10000, 50000 };
+        
+        for (double radius : radii) {
+            List<Stop> candidates = allStops.stream()
+                    .filter(stop -> GeoUtils.haversine(lat, lng, stop.getLatitude(), stop.getLongitude()) <= radius)
+                    .sorted(Comparator.comparingDouble(stop -> GeoUtils.haversine(lat, lng, stop.getLatitude(), stop.getLongitude())))
+                    .limit(MAX_CANDIDATE_STOPS)
+                    .toList();
+                    
+            if (!candidates.isEmpty()) {
+                return candidates;
+            }
+        }
+        
+        return new ArrayList<>();
     }
 
     private int indexOfStop(List<Stop> ordered, Long stopId) {

@@ -29,15 +29,24 @@ public class Route {
     @ManyToMany(mappedBy = "routes")
     private List<Stop> stops = new ArrayList<>();
 
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "route_stop_sequence", joinColumns = @JoinColumn(name = "route_id"))
+    @Column(name = "stop_id")
+    @OrderColumn(name = "stop_index")
+    private List<String> stopSequence = new ArrayList<>();
+
     // Getters
     public Long getId() { return id; }
     public String getRouteCode() { return routeCode; }
     public String getName() { return name; }
     public List<Stop> getStops() { return stops; }
+    public List<String> getStopSequence() { return stopSequence; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
     public void setRouteCode(String routeCode) { this.routeCode = routeCode; }
     public void setName(String name) { this.name = name; }
     public void setStops(List<Stop> stops) { this.stops = stops; }
+    public void setStopSequence(List<String> stopSequence) { this.stopSequence = stopSequence; }
 }
