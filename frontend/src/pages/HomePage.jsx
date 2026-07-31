@@ -55,7 +55,7 @@ export default function HomePage() {
 
   const fetchBuses = useCallback(() => {
     const loc = userLocationRef.current || { lat: 28.6315, lng: 77.2167 };
-    getNearbyBuses(loc.lat, loc.lng, 5000, 50)
+    getNearbyBuses(loc.lat, loc.lng, 50000, 100)
       .then((data) => {
         setBuses(data || []);
         setLastUpdated(new Date());
