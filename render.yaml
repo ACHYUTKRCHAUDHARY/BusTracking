@@ -4,8 +4,8 @@ services:
     env: java
     region: singapore
     plan: free
-    rootDir: BusTracking/backend
-    buildCommand: ./mvnw clean package -DskipTests
+    rootDir: backend
+    buildCommand: chmod +x mvnw && ./mvnw clean package -DskipTests
     startCommand: java -jar target/bus-tracker-0.0.1-SNAPSHOT.jar
     envVars:
       - key: JAVA_VERSION
